@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bee Tunnel Node</title>
+    <!-- Professional Core UI and P2P Networking Engines -->
+    <script src="https://unpkg.com"></script>
+    <script src="https://jsdelivr.net"></script>
+</head>
+<body class="bg-slate-950 text-white font-sans min-h-screen flex items-center justify-center p-4">
+
+    <!-- MAXIMIZED PROFESSIONAL PANEL 2 CORE -->
+    <div class="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl shadow-amber-500/5 flex flex-col justify-between">
+        
+        <!-- Header -->
+        <div class="border-b border-slate-800 pb-6 text-center">
+            <h2 class="text-3xl font-black tracking-tight text-amber-500 flex items-center justify-center gap-2">
+                🐝 PREMIUM DATA CONDUIT
+            </h2>
+            <p class="text-slate-400 text-sm mt-2">
+                Routing high-speed mobile data packs directly into the P2P proxy framework.
+            </p>
+        </div>
+
+        <!-- Connection Core Status Box -->
+        <div class="my-8 p-6 bg-slate-950/80 rounded-xl border border-slate-800 text-center">
+            <div class="flex items-center justify-center gap-3 mb-4">
+                <span id="statusIndicator" class="h-3 w-3 rounded-full bg-red-500 animate-pulse"></span>
+                <h3 class="text-lg font-bold tracking-wide uppercase text-slate-300">
+                    System State: <span id="statusText" class="text-red-500">Initializing...</span>
+                </h3>
+            </div>
+            
+            <p class="text-xs text-slate-500 mb-2 font-medium uppercase tracking-wider">Your Unique Node Link Key</p>
+            <div class="bg-slate-900 px-4 py-3 rounded-lg border border-slate-800 font-mono text-sm text-amber-400 select-all break-all cursor-pointer font-semibold tracking-wider" onclick="navigator.clipboard.writeText(this.innerText); alert('Key copied to clipboard!');" id="peerIdText">
+                Generating P2P Address...
+            </div>
+        </div>
+
+        <!-- The Live Metrics Display -->
+        <div class="grid grid-cols-2 gap-4 mb-8">
+            <div class="p-4 bg-slate-950/50 rounded-xl border border-slate-800/60 text-center">
+                <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Bandwidth Contributed</p>
+                <div class="text-3xl font-black text-slate-200"><span id="dataText">0.0</span> <span class="text-sm font-normal text-slate-500">MB</span></div>
+            </div>
+            <div class="p-4 bg-slate-950/50 rounded-xl border border-slate-800/60 text-center">
+                <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Generated Tokens</p>
+                <div class="text-3xl font-black text-amber-400">🐝 <span id="beeCount">0</span></div>
+            </div>
+        </div>
+
+        <!-- Automatic Connection Link Field (For the 0GB Device) -->
+        <div id="receiverControls" class="mb-6 p-4 bg-slate-950/50 rounded-xl border border-slate-800 hidden">
+            <p class="text-xs text-slate-400 font-bold mb-2 uppercase tracking-wider">🔗 Connect to Friend's Node Key</p>
+            <div class="flex gap-2">
+                <input type="text" id="targetPeerId" placeholder="Paste your friend's key here..." class="flex-1 px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm focus:outline-none focus:border-amber-500 text-amber-400 font-mono">
+                <button onclick="connectToFriend()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm rounded-lg transition cursor-pointer">Link Tunnel</button>
+            </div>
+        </div>
+
+        <!-- Footer Legal Notice -->
+        <div class="text-center text-[11px] text-slate-600 font-medium tracking-wide uppercase border-t border-slate-800/60 pt-4">
+            Secured WebRTC Sandbox Protocol • Zero Configuration Deployment
+        </div>
+    </div>
+
+    <script>
+        let bees = 0;
+        let mbShared = 0;
+        let peer;
+        let activeConnection;
+
+        window.onload = function() {
+            // Setup automated peer handling
+            peer = new Peer();
+            
+            peer.on('open', (id) => {
+                document.getElementById('peerIdText').innerText = id;
+                document.getElementById('statusText').innerText = "Waiting for Friend";
+                document.getElementById('statusText').className = "text-sky-400";
+                document.getElementById('statusIndicator').className = "h-3 w-3 rounded-full bg-sky-400 animate-pulse";
+                document.getElementById('receiverControls').classList.remove('hidden');
+            });
+
+            // Automatic listener when YOUR phone links up to your FRIEND'S computer data pack
+            peer.on('connection', (conn) => {
+                handleIncomingConnection(conn);
+            });
+        };
+
+        function handleIncomingConnection(conn) {
+            activeConnection = conn;
+            document.getElementById('statusText').innerText = "Tunnel Active & Consuming";
+            document.getElementById('statusText').className = "text-emerald-400";
+            document.getElementById('statusIndicator').className = "h-3 w-3 rounded-full bg-emerald-400 shadow-md shadow-emerald-500/50";
+            
+            // Listen for traffic routing requests
+            conn.on('data', (data) => {
+                if (data.action === 'tunnel_request') {
+                    // Simulating background system auto-fetching data chunks
+                    let mockChunkSize = Math.random() * (15 - 5) + 5; // 5MB to 15MB file chunk data
+                    mbShared += mockChunkSize;
+                    bees += Math.floor(mockChunkSize * 1.5); // Reward structure mapping
+                    
+                    document.getElementById('dataText').innerText = mbShared.toFixed(1);
+                    document.getElementById('beeCount').innerText = bees;
+                    
+                    // Reply down the tunnel path
+                    conn.send({ action: 'tunnel_success', confirmedMb: mockChunkSize });
+                }
+            });
+        }
+
+        // Action function for the 0GB device to initiate the handshaking protocol
+        function connectToFriend() {
+            const targetId = document.getElementById('targetPeerId').value;
+            if(!targetId) return alert('Please input a valid Target Node Key');
+            
+            document.getElementById('statusText').innerText = "Dialing Tunnel...";
+            let conn = peer.connect(targetId);
+            
+            conn.on('open', () => {
+                document.getElementById('statusText').innerText = "Connected to Provider Node";
+                document.getElementById('statusText').className = "text-emerald-400";
+                document.getElementById('statusIndicator').className = "h-3 w-3 rounded-full bg-emerald-400";
+                
+                // Keep pumping active background proxy tests every 3 seconds to pull his data pack
+                setInterval(() => {
+                    conn.send({ action: 'tunnel_request' });
+                }, 3000);
+            });
+
+            conn.on('data', (data) => {
+                if(data.action === 'tunnel_success') {
+                    console.log(`Successfully pulled data payload chunk from provider.`);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
